@@ -1,0 +1,173 @@
+<h1>Create</h1>
+
+<h4>HotelTB</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Hotel Name -->
+            <div class="form-group">
+                <label asp-for="Hotel_Name" class="control-label"></label>
+                <input asp-for="Hotel_Name" class="form-control" />
+                <span asp-validation-for="Hotel_Name" class="text-danger"></span>
+            </div>
+
+            <!-- Photo -->
+            <div class="form-group">
+                <label class="font-weight-bold">Photo:</label>
+                <div class="custom-file">
+                    <input asp-for="Photos" class="form-control custom-file-input" type="file" />
+                    <label class="custom-file-label" for="Photos">Choose Photo .....</label>
+                </div>
+            </div>
+
+            <!-- Hotel Description -->
+            <div class="form-group">
+                <label asp-for="Hotel_Description" class="control-label"></label>
+                <input asp-for="Hotel_Description" class="form-control" />
+                <span asp-validation-for="Hotel_Description" class="text-danger"></span>
+            </div>
+
+
+            <!-- Select Map Location -->
+            <div class="form-group">
+                <!-- Search Location Input -->
+                <div class="form-group">
+                    <label class="font-weight-bold">Search Location:</label>
+                    <input id="search-location-input" class="form-control" type="text" placeholder="Search for a location">
+                </div>
+
+                <label class="font-weight-bold">Select Map Location:</label>
+                <div id="map" style="height: 400px;"></div>
+                <input asp-for="Hotel_map_coordinate" id="map-coordinate-input" class="form-control" style="display: none;" />
+                <span asp-validation-for="Hotel_map_coordinate" class="text-danger"></span>
+            </div>
+
+            <!-- Address -->
+            <div class="form-group">
+                <label asp-for="Address" class="control-label"></label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <!-- Contact Number -->
+            <div class="form-group">
+                <label asp-for="Contact_No" class="control-label"></label>
+                <input asp-for="Contact_No" class="form-control" />
+                <span asp-validation-for="Contact_No" class="text-danger"></span>
+            </div>
+
+            <!-- Email Address -->
+            <div class="form-group">
+                <label asp-for="Email_Adderss" class="control-label"></label>
+                <input asp-for="Email_Adderss" class="form-control" />
+                <span asp-validation-for="Email_Adderss" class="text-danger"></span>
+            </div>
+
+            <!-- Contact Person -->
+            <div class="form-group">
+                <label asp-for="Contect_Person" class="control-label"></label>
+                <input asp-for="Contect_Person" class="form-control" />
+                <span asp-validation-for="Contect_Person" class="text-danger"></span>
+            </div>
+
+            <!-- Standard Check-In Time -->
+            <div class="form-group">
+                <label asp-for="Standard_check_In_Time" class="control-label"></label>
+                <input asp-for="Standard_check_In_Time" type="time" class="form-control" />
+                <span asp-validation-for="Standard_check_In_Time" class="text-danger"></span>
+            </div>
+
+            <!-- Standard Check-Out Time -->
+            <div class="form-group">
+                <label asp-for="Standard_check_out_Time" class="control-label"></label>
+                <input asp-for="Standard_check_out_Time" type="time" class="form-control" />
+                <span asp-validation-for="Standard_check_out_Time" class="text-danger"></span>
+            </div>
+
+            <!-- Active Flag -->
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Active_Flag" /> @Html.DisplayNameFor(model => model.Active_Flag)
+                </label>
+            </div>
+
+            <!-- Delete Flag -->
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Delete_Flag" /> @Html.DisplayNameFor(model => model.Delete_Flag)
+                </label>
+            </div>
+
+            <!-- Sorted Field -->
+            <div class="form-group">
+                <label asp-for="sortedfield" class="control-label"></label>
+                <input asp-for="sortedfield" class="form-control" />
+                <span asp-validation-for="sortedfield" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script>
+        var map;
+        var marker;
+        var autocomplete;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 21.196060, lng: 72.904547 },
+                zoom: 15
+            });
+
+            marker = new google.maps.Marker({
+                map: map,
+                draggable: true
+            });
+
+            google.maps.event.addListener(marker, 'dragend', function (event) {
+                updateCoordinates(event.latLng.lat(), event.latLng.lng());
+            });
+
+            google.maps.event.addListener(map, 'click', function (event) {
+                marker.setPosition(event.latLng);
+                updateCoordinates(event.latLng.lat(), event.latLng.lng());
+            });
+
+            // Create the search box and link it to the UI element.
+            var input = document.getElementById('search-location-input');
+            autocomplete = new google.maps.places.Autocomplete(input);
+
+            // Add listener to update map when a location is selected from the search results.
+            autocomplete.addListener('place_changed', function () {
+                var place = autocomplete.getPlace();
+                if (!place.geometry) {
+                    return;
+                }
+
+                map.setCenter(place.geometry.location);
+                marker.setPosition(place.geometry.location);
+                updateCoordinates(place.geometry.location.lat(), place.geometry.location.lng());
+            });
+        }
+
+        function updateCoordinates(lat, lng) {
+            var coordinates = { lat: lat, lng: lng };
+            var jsonCoordinates = JSON.stringify(coordinates);
+            document.getElementById('map-coordinate-input').value = jsonCoordinates;
+        }
+
+        google.maps.event.addDomListener(window, 'load', initMap);
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDv2kE8VnPyGVoH5VpEwXr98XXwBWppVEk&libraries=places&callback=initMap" async defer></script>
+
+}
